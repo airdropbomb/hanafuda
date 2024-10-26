@@ -97,7 +97,8 @@ The script below will help you to tap cards on Grow, you only need to enter the 
 - Open https://hanafuda.hana.network/grow
 - Press F12 to open the console
 - Copy and paste the following script:
-   ```javascript
+
+```yaml
 let count = 0;
 function clickElements() {
     if (count < 1000) {
@@ -125,9 +126,8 @@ function clickElements() {
     }
 }
 
-// Start the process
 clickElements();
-   ```
+```
 
 ### Logging
 All transaction details will be logged into a file named hash.log, including any errors encountered during execution.
