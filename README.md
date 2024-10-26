@@ -91,6 +91,44 @@ Enter the number of deposit to be executed: 2
 Enter the account numbers to use (e.g., 0,2,4 for accounts 1,3,5 or 'all' for all accounts): all
    ```
 
+## Auto Grow Tap a Card
+The script below will help you to tap cards on Grow, you only need to enter the script below on the Grow pages console.
+
+- Open https://hanafuda.hana.network/grow
+- Press F12 to open the console
+- Copy and paste the following script:
+   ```javascript
+let count = 0;
+function clickElements() {
+    if (count < 1000) {
+        function clickElement(selector, buttonName) {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.click();
+                console.log(`Clicked ${buttonName}`);
+            } else {
+                console.log(`${buttonName} not found`);
+            }
+        }
+
+        const selector1 = 'body > div > div > div:nth-child(3) > div > div.relative.z-10.grid.size-full.flex-1.grid-cols-1.grid-rows-\\[20\\%_60\\%_20\\%\\].content-center.items-center.justify-center.justify-items-center.p-6 > div.relative.flex.size-full.flex-col.items-center.justify-center > div > div > canvas';
+        const selector2 = 'body > div > div > div:nth-child(3) > div > div.relative.z-10.grid.size-full.flex-1.grid-cols-1.grid-rows-\\[20\\%_60\\%_20\\%\\].content-center.items-center.justify-center.justify-items-center.p-6 > div.relative.flex.w-full.items-center.justify-center.gap-1\\.5.lg\\:gap-3 > button.flex.cursor-pointer.items-center.justify-center.font-medium.tracking-\\[0\\.24px\\].disabled\\:cursor-default.shiny-button-color-red.shiny-button.h-\\[57px\\].w-\\[224px\\].rounded-\\[8px\\].text-\\[12px\\].max-w-\\[128px\\].gap-1\\.5.sm\\:gap-3.lg\\:w-\\[224px\\].lg\\:max-w-full';
+
+        // Click the first element
+        clickElement(selector1, 'button 1');
+
+        setTimeout(() => {
+            clickElement(selector2, 'button 2');
+            count++; // Increment the counter variable after each round
+            setTimeout(clickElements, 3000);
+        }, 5000);
+    }
+}
+
+// Start the process
+clickElements();
+   ```
+
 ### Logging
 All transaction details will be logged into a file named hash.log, including any errors encountered during execution.
 
