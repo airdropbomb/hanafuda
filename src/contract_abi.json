@@ -1,0 +1,10 @@
+[
+    {
+        "constant": false,
+        "inputs": [],
+        "name": "depositETH",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    }
+]
