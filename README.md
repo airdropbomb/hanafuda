@@ -18,11 +18,12 @@ To participate:
 NOTE: Make first deposit `MANUALY` on Base in a Small Amount like <= $0.5 - $1
 
 # Feature
- - Asynchronous execution for handling multiple transactions concurrently.
- - Customizable deposit amounts with minimum and maximum thresholds.
- - Automatic nonce management to prevent transaction failures.
- - Logs transaction details and errors for monitoring purposes.
- - MultiAccount support [BATCH PROCESS] 
+ - Auto `Grow` & `Garden` Actions [ Updated : 2024/10/31 ] with `tokens.txt`
+ - Asynchronous execution for handling `multiple transactions` concurrently.
+ - Customizable deposit amounts with `minimum` and `maximum` thresholds.
+ - Automatic `nonce management` to prevent transaction failures.
+ - Logs transaction `details` and `errors` for monitoring purposes.
+ - MultiAccount support `BATCH PROCESS`
 
 ## Requirements
 
@@ -52,14 +53,15 @@ Create a config.json file in the root directory with the following structure:
 
    ```json
 {
-    "rpc_url": "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID",
+    "rpc_url": "https://mainnet.base.org",
     "amount_min": 0.0000000001,
     "amount_max": 0.000000001,
-    "delay": 1
+    "delay": 2,
+    "countdown_before_start": 10
 }
    ```
 
-Replace `YOUR_INFURA_PROJECT_ID` with your actual Infura project ID or another Ethereum node provider URL.
+Replace `rpc_url` with your actual Infura project ID or another Ethereum node provider URL.
 Adjust `amount_min`, `amount_max`, and `delay` according to your requirements.
 
 ### Private Keys:
@@ -91,43 +93,15 @@ Enter the number of deposit to be executed: 2
 Enter the account numbers to use (e.g., 0,2,4 for accounts 1,3,5 or 'all' for all accounts): all
    ```
 
-## Auto Grow Tap a Card
-The script below will help you to tap cards on Grow, you only need to enter the script below on the Grow pages console.
+## Grow / Garden (how to get tokens)
 
-- Open https://hanafuda.hana.network/grow
-- Press F12 to open the console
-- Copy and paste the following script:
-
-```yaml
-let count = 0;
-function clickElements() {
-    if (count < 1000) {
-        function clickElement(selector, buttonName) {
-            const element = document.querySelector(selector);
-            if (element) {
-                element.click();
-                console.log(`Clicked ${buttonName}`);
-            } else {
-                console.log(`${buttonName} not found`);
-            }
-        }
-
-        const selector1 = 'body > div > div > div:nth-child(3) > div > div.relative.z-10.grid.size-full.flex-1.grid-cols-1.grid-rows-\\[20\\%_60\\%_20\\%\\].content-center.items-center.justify-center.justify-items-center.p-6 > div.relative.flex.size-full.flex-col.items-center.justify-center > div > div > canvas';
-        const selector2 = 'body > div > div > div:nth-child(3) > div > div.relative.z-10.grid.size-full.flex-1.grid-cols-1.grid-rows-\\[20\\%_60\\%_20\\%\\].content-center.items-center.justify-center.justify-items-center.p-6 > div.relative.flex.w-full.items-center.justify-center.gap-1\\.5.lg\\:gap-3 > button.flex.cursor-pointer.items-center.justify-center.font-medium.tracking-\\[0\\.24px\\].disabled\\:cursor-default.shiny-button-color-red.shiny-button.h-\\[57px\\].w-\\[224px\\].rounded-\\[8px\\].text-\\[12px\\].max-w-\\[128px\\].gap-1\\.5.sm\\:gap-3.lg\\:w-\\[224px\\].lg\\:max-w-full';
-
-        // Click the first element
-        clickElement(selector1, 'button 1');
-
-        setTimeout(() => {
-            clickElement(selector2, 'button 2');
-            count++; // Increment the counter variable after each round
-            setTimeout(clickElements, 3000);
-        }, 5000);
-    }
-}
-
-clickElements();
-```
+- Open https://hanafuda.hana.network/
+- Press `F12` / `Inspect Element` to open the console
+- Go to `Applications` & `Session Storage`
+- Choose the link of hanafuda network then choose `Key` : firbase:authUser
+- on Value of `stsTokenManager: {,...} 
+- Take the Value of refreshToken: start with `AMf-`
+- Paste it to `tokens.txt`
 
 ### Logging
 All transaction details will be logged into a file named hash.log, including any errors encountered during execution.

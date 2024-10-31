@@ -1,6 +1,6 @@
 import os
 import json
-import asyncio
+import time
 from datetime import datetime
 from colorama import *
 
@@ -23,7 +23,7 @@ def _banner():
  ██║   ██║   ███████║╚█████╔╝██║  ██║╚███╔███╔╝
  ╚═╝   ╚═╝   ╚══════╝ ╚════╝ ╚═╝  ╚═╝ ╚══╝╚══╝  """ 
     print(Fore.GREEN + Style.BRIGHT + banner + Style.RESET_ALL)
-    print(hju + f" Hanafuda - Auto (batch) Deposit v1.0.0")
+    print(hju + f" Hanafuda - Auto Deposit / Grows / Gardens")
     print(mrh + f" FREE TO USE = Join us on {pth}t.me/DEEPLCHAIN")
     print(mrh + f" before start please '{hju}git pull{mrh}' to update bot")
     log_line()
@@ -52,7 +52,7 @@ def log(message, **kwargs):
 def log_line():
     print(pth + "~" * 60)
 
-async def countdown_timer(seconds):
+def countdown_timer(seconds):
     while seconds:
         m, s = divmod(seconds, 60)
         h, m = divmod(m, 60)
@@ -61,5 +61,5 @@ async def countdown_timer(seconds):
         s = str(s).zfill(2)
         print(f"{pth}please wait until {h}:{m}:{s} ", flush=True, end="\r")
         seconds -= 1
-        await asyncio.sleep(1)
+        time.sleep(1)
     print(f"{pth}please wait until {h}:{m}:{s} ", flush=True, end="\r")
