@@ -1,4 +1,4 @@
-# HANA NETWORK - HANAFUDA BATCH DEPOSIT
+# HANA NETWORK - Auto Deposit / Grows / Gardens
 
 Hana, incubated by Binance Labs, has launched a campaign that allows you to earn points by depositing assets, collecting cards, and growing your garden.
 
