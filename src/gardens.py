@@ -66,7 +66,7 @@ class Grows:
 
         grow = profile['data']['getGardenForCurrentUser']['gardenStatus']['growActionCount']
         garden = profile['data']['getGardenForCurrentUser']['gardenStatus']['gardenRewardActionCount']
-        log(hju + f"POINTS: {pth}{balance} {hju}| Deposit Counts: {pth}{deposit} {hju}| Grow left: {pth}{grow} {hju}| Garden left: {pth}{garden}")
+        print(hju + f"POINTS: {pth}{balance} {hju}| Deposit Counts: {pth}{deposit} {hju}| Grow left: {pth}{grow} {hju}| Garden left: {pth}{garden}")
 
         while garden <= 10:
             log(kng + f"You dont have enough garden to open!")

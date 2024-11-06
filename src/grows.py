@@ -66,7 +66,7 @@ class Grows:
 
         grow = profile['data']['getGardenForCurrentUser']['gardenStatus']['growActionCount']
         garden = profile['data']['getGardenForCurrentUser']['gardenStatus']['gardenRewardActionCount']
-        log(hju + f"POINTS: {pth}{balance} {hju}| Deposit Counts: {pth}{deposit} {hju}| Grow left: {pth}{grow} {hju}| Garden left: {pth}{garden}")
+        print(hju + f"POINTS: {pth}{balance} {hju}| Deposit Counts: {pth}{deposit} {hju}| Grow left: {pth}{grow} {hju}| Garden left: {pth}{garden}")
 
         while grow > 0:
             action_query = {
@@ -84,17 +84,6 @@ class Grows:
                 "operationName": "commitGrowAction"
             }
             await self.start(self.api_url, 'POST', commit_query)
-
-        while garden >= 10:
-            garden_action_query = {
-                "query": "mutation executeGardenRewardAction($limit: Int!) { executeGardenRewardAction(limit: $limit) { data { cardId group } isNew } }",
-                "variables": {"limit": 10},
-                "operationName": "executeGardenRewardAction"
-            }
-            mine_garden = await self.start(self.api_url, 'POST', garden_action_query)
-            card_ids = [item['data']['cardId'] for item in mine_garden['data']['executeGardenRewardAction']]
-            log(hju + f"Opened Garden: {pth}{card_ids}")
-            garden -= 10
 
     def process_token(self, refresh_token):
         asyncio.run(self.grow_and_garden(refresh_token))
