@@ -3,15 +3,18 @@ from colorama import init, Style
 import httpx
 import concurrent.futures
 from agent import gr_ua
-from deeplchain import log, countdown_timer, mrh, bru, pth, hju, kng, _clear, _banner
+from deeplchain import log, countdown_timer, mrh, bru, pth, hju, kng, _clear, _banner, read_config
 
 init(autoreset=True)
 
 class Grows:
     def __init__(self, token_file):
+        self.config = read_config()
         with open(token_file, "r") as file:
             self.access_tokens = [line.strip() for line in file if line.strip()]
         self.api_url = "https://hanafuda-backend-app-520478841386.us-central1.run.app/graphql"
+        self.countdown_before_start = self.config.get('countdown_before_start', False)
+        self.countdown_loop = self.config.get('countdown_loop', 3800)
         self.api_key = "AIzaSyDipzN0VRfTPnMGhQ5PSzO27Cxm3DohJGY"
         self.headers = {
             'Accept': '*/*',
@@ -66,7 +69,7 @@ class Grows:
 
         grow = profile['data']['getGardenForCurrentUser']['gardenStatus']['growActionCount']
         garden = profile['data']['getGardenForCurrentUser']['gardenStatus']['gardenRewardActionCount']
-        print(hju + f"POINTS: {pth}{balance} {hju}| Deposit Counts: {pth}{deposit} {hju}| Grow left: {pth}{grow} {hju}| Garden left: {pth}{garden}")
+        print(hju + f"Points: {pth}{balance} {hju}| Grow : {pth}{grow} {hju}| Garden : {pth}{garden} {hju}| Deposit : {pth}{deposit} ")
 
         while garden <= 10:
             log(kng + f"You dont have enough garden to open!")
@@ -80,7 +83,7 @@ class Grows:
             }
             mine_garden = await self.start(self.api_url, 'POST', garden_action_query)
             card_ids = [item['data']['cardId'] for item in mine_garden['data']['executeGardenRewardAction']]
-            log(hju + f"Opened Garden: {pth}{card_ids}")
+            log(hju + f"Garden Opened: {pth}{card_ids}")
             garden -= 10
 
     def process_token(self, refresh_token):
@@ -89,6 +92,8 @@ class Grows:
     def main(self):
         _clear()
         _banner()
+        log(hju + f"Preparing your garden data!")
+        countdown_timer(self.countdown_before_start)
         while True:
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [executor.submit(self.process_token, token) for token in self.access_tokens]
@@ -98,8 +103,8 @@ class Grows:
                     except Exception as e:
                         log(mrh + f"Error processing token: {str(e)}")
 
-            log(bru + f"Cooling down for 10 minutes...")
-            countdown_timer(600)
+            log(bru + f"Cooling down for {self.countdown_loop} seconds...")
+            countdown_timer(self.countdown_loop)
 
 if __name__ == '__main__':
     try:

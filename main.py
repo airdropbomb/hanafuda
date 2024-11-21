@@ -2,9 +2,8 @@ import os
 import sys
 import time
 from colorama import init
-from src.deeplchain import _clear, _banner, kng, mrh, bru, hju, pth, log, read_config, countdown_timer
+from src.deeplchain import _clear, _banner, kng, mrh, bru, hju, pth, log
 
-config = read_config()
 init(autoreset=True)
 
 def run_grows():
@@ -19,7 +18,6 @@ def run_hanafuda():
 def main():
     _clear()
     _banner()
-    countdown_before_start = config.get('countdown_before_start', 10)
     while True:
         try:
             menu = f"""
@@ -33,12 +31,8 @@ def main():
             choice = input(" Enter your choice (1,2,3,4): ")
 
             if choice == '1':
-                log(hju + f"Preparing your grow data!")
-                countdown_timer(countdown_before_start)
                 run_grows()
             elif choice == '2':
-                log(hju + f"Preparing your garden data!")
-                countdown_timer(countdown_before_start)
                 run_gardens()
             elif choice == '3':
                 log(hju + f"Preparing your deposit data!")

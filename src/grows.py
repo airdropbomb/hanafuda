@@ -1,17 +1,17 @@
 import asyncio
-from colorama import init, Style
-import httpx
-import concurrent.futures
+import aiohttp
 from agent import gr_ua
-from deeplchain import log, countdown_timer, mrh, bru, pth, hju, kng, _clear, _banner
-
-init(autoreset=True)
+from deeplchain import log, countdown_timer, mrh, bru, pth, hju, kng, htm, _clear, _banner, read_config, log_error
 
 class Grows:
     def __init__(self, token_file):
+        self.cfg = read_config()
         with open(token_file, "r") as file:
-            self.access_tokens = [line.strip() for line in file if line.strip()]
+            self.tokens = [line.strip() for line in file if line.strip()]
         self.api_url = "https://hanafuda-backend-app-520478841386.us-central1.run.app/graphql"
+        self.delay = self.cfg.get('account_delay', 5) 
+        self.countdown_before_start = self.cfg.get('countdown_before_start', 5)
+        self.cooldown = self.cfg.get('countdown_loop', 3800)
         self.api_key = "AIzaSyDipzN0VRfTPnMGhQ5PSzO27Cxm3DohJGY"
         self.headers = {
             'Accept': '*/*',
@@ -19,93 +19,146 @@ class Grows:
             'User-Agent': gr_ua()
         }
 
-    async def start(self, url, method, payload_data=None, retries=3, delay=3, timeout=20):
-        for attempt in range(retries):
-            try:
-                async with httpx.AsyncClient(timeout=timeout) as client:
-                    response = await client.request(method, url, headers=self.headers, json=payload_data)
-                    if response.status_code != 200:
-                        raise Exception(f'HTTP error! Status: {response.status_code}')
-                    return response.json()
-            except Exception as e:
-                log(mrh + f"Failed: Retrying {attempt + 1} {str(e)}")
-                if attempt < retries - 1:
-                    await asyncio.sleep(delay)
-                else:
-                    raise
+    async def req(self, session, url, method, payload=None):
+        """Handle API requests."""
+        async with session.request(method, url, headers=self.headers, json=payload) as response:
+            if response.status != 200:
+                raise Exception(f"HTTP Error: {response.status}")
+            return await response.json()
 
-    async def refresh_access_token(self, refresh_token):
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f'https://securetoken.googleapis.com/v1/token?key={self.api_key}',
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
-                data=f'grant_type=refresh_token&refresh_token={refresh_token}'
-            )
-            if response.status_code != 200:
-                raise Exception(mrh + f"Failed to refresh access token!")
-            return response.json().get('access_token')
+    async def refresh_token(self, session, token):
+        """Refresh and set authorization token once per session."""
+        url = f'https://securetoken.googleapis.com/v1/token?key={self.api_key}'
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        payload = f'grant_type=refresh_token&refresh_token={token}'
+        async with session.post(url, headers=headers, data=payload) as response:
+            if response.status != 200:
+                raise Exception(mrh + f"Failed to refresh token")
+            data = await response.json()
+            return data.get('access_token')
 
-    async def grow_and_garden(self, refresh_token):
-        new_access_token = await self.refresh_access_token(refresh_token)
-        self.headers['authorization'] = f'Bearer {new_access_token}'
-
-        info_query = {
-            "query": "query CurrentUser { currentUser { id sub name iconPath depositCount totalPoint evmAddress { userId address } inviter { id name } } }",
-            "operationName": "CurrentUser"
+    async def grow(self, session):
+        """Perform the grow action and return reward."""
+        query = {
+            "query": """
+                mutation executeGrowAction {
+                    executeGrowAction(withAll: true) {
+                        totalValue
+                        multiplyRate
+                    }
+                    executeSnsShare(actionType: GROW, snsType: X) {
+                        bonus
+                    }
+                }
+            """,
+            "operationName": "executeGrowAction"
         }
-        info = await self.start(self.api_url, 'POST', info_query)
+        res = await self.req(session, self.api_url, 'POST', query)
+        if res and 'data' in res and 'executeGrowAction' in res['data']:
+            return res['data']['executeGrowAction']['totalValue']
+        else:
+            log(mrh + f"Error: Unexpected response: {res}")
+            return 0
 
-        balance = info['data']['currentUser']['totalPoint']
-        deposit = info['data']['currentUser']['depositCount']
+    async def get_user_info(self, session, token):
+        """Retrieve user information and log basic details."""
+        auth_token = await self.refresh_token(session, token)
+        self.headers['authorization'] = f'Bearer {auth_token}'
 
-        bet_query = {
-            "query": "query GetGardenForCurrentUser { getGardenForCurrentUser { id inviteCode gardenDepositCount gardenStatus { id activeEpoch growActionCount gardenRewardActionCount } gardenMilestoneRewardInfo { id gardenDepositCountWhenLastCalculated lastAcquiredAt createdAt } gardenMembers { id sub name iconPath depositCount } } }",
+        query = {
+            "query": """
+                query GetGardenForCurrentUser {
+                getGardenForCurrentUser {
+                    id
+                    inviteCode
+                    gardenDepositCount
+                    gardenStatus {
+                    id
+                    growActionCount
+                    gardenRewardActionCount
+                    }
+                    gardenMilestoneRewardInfo {
+                    id
+                    gardenDepositCountWhenLastCalculated
+                    lastAcquiredAt
+                    createdAt
+                    }
+                    gardenMembers {
+                    id
+                    sub
+                    name
+                    iconPath
+                    depositCount
+                    }
+                }
+                }
+            """,
             "operationName": "GetGardenForCurrentUser"
         }
-        profile = await self.start(self.api_url, 'POST', bet_query)
+        info = await self.req(session, self.api_url, 'POST', query)
+        user_id = info['data']['getGardenForCurrentUser']['id']
+        invite_code = info['data']['getGardenForCurrentUser']['inviteCode']
+        log(hju + f"User ID: {pth}{user_id} {hju}| Invite Code: {pth}{invite_code}")
 
-        grow = profile['data']['getGardenForCurrentUser']['gardenStatus']['growActionCount']
-        garden = profile['data']['getGardenForCurrentUser']['gardenStatus']['gardenRewardActionCount']
-        print(hju + f"POINTS: {pth}{balance} {hju}| Deposit Counts: {pth}{deposit} {hju}| Grow left: {pth}{grow} {hju}| Garden left: {pth}{garden}")
+    async def process_account(self, session, token):
+        """Process grow action and handle rewards."""
+        auth_token = await self.refresh_token(session, token)
+        self.headers['authorization'] = f'Bearer {auth_token}'
 
-        while grow > 0:
-            action_query = {
-                "query": "mutation issueGrowAction { issueGrowAction }",
-                "operationName": "issueGrowAction"
-            }
-            mine = await self.start(self.api_url, 'POST', action_query)
-            reward = mine['data']['issueGrowAction']
-            balance += reward
-            grow -= 1
-            log(hju + f"Rewards: {pth}{reward} {hju}| Balance: {pth}{balance} {hju}| Grow left: {pth}{grow}")
+        query = {
+            "query": "query getCurrentUser { "
+                      "currentUser { id totalPoint depositCount } "
+                      "getGardenForCurrentUser { "
+                      "gardenStatus { growActionCount gardenRewardActionCount } "
+                      "} "
+                      "} ",
+            "operationName": "getCurrentUser"
+        }
+        info = await self.req(session, self.api_url, 'POST', query)
+        balance = info['data']['currentUser']['totalPoint']
+        grow = info['data']['getGardenForCurrentUser']['gardenStatus']['growActionCount']
+        garden = info['data']['getGardenForCurrentUser']['gardenStatus']['gardenRewardActionCount']
+        log(hju + f"Grow: {pth}{grow} {hju}| Garden: {pth}{garden} {hju}| Balance: {pth}{balance}")
 
-            commit_query = {
-                "query": "mutation commitGrowAction { commitGrowAction }",
-                "operationName": "commitGrowAction"
-            }
-            await self.start(self.api_url, 'POST', commit_query)
+        if grow < 10:
+            log(hju + "Not enough grow actions to claim!")
 
-    def process_token(self, refresh_token):
-        asyncio.run(self.grow_and_garden(refresh_token))
+        if grow > 0:
+            reward = await self.grow(session)
+            if reward:
+                balance += reward
+                log(hju + f"Grow actions: {pth}{0} {hju}| Balance: {pth}{balance} {hju}| Rewards: {pth}{reward}")
 
-    def main(self):
-        _clear()
-        _banner()
-        while True:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                futures = [executor.submit(self.process_token, token) for token in self.access_tokens]
-                for future in concurrent.futures.as_completed(futures):
-                    try:
-                        future.result()
-                    except Exception as e:
-                        log(mrh + f"Error processing token: {str(e)}")
+    async def main(self):
+        log(hju + f"Waiting for {pth}{self.countdown_before_start} seconds {hju}before start!")
+        log("~" * 38)
+        try:
+            async with aiohttp.ClientSession() as session:
+                total_accounts = len(self.tokens)
+                account_number = 1
 
-            log(bru + f"Cooling down for 10 minutes...")
-            countdown_timer(600)
+                for token in self.tokens:
+                    countdown_timer(self.countdown_before_start)
+                    log(hju + f"Processing account {pth}{account_number}/{total_accounts}")
+                    await self.get_user_info(session, token)
+                    await self.process_account(session, token)
+                    log("~" * 38)
+                    countdown_timer(self.delay)
+
+                    account_number += 1
+
+                countdown_timer(self.cooldown)
+                account_number = 1
+
+        except Exception as e:
+            log(mrh + "An error occurred, check last.log")
+            log_error(f"{e}")
 
 if __name__ == '__main__':
+    _clear()
+    _banner()
     try:
         grows = Grows("tokens.txt")
-        grows.main()
+        asyncio.run(grows.main())
     except KeyboardInterrupt:
-        log(mrh + f"Keyboard interrupted by user!")
+        log("Keyboard interrupted by user!")
