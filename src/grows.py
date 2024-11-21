@@ -157,8 +157,10 @@ class Grows:
 if __name__ == '__main__':
     _clear()
     _banner()
-    try:
-        grows = Grows("tokens.txt")
-        asyncio.run(grows.main())
-    except KeyboardInterrupt:
-        log("Keyboard interrupted by user!")
+    while True:
+        try:
+            grows = Grows("tokens.txt")
+            asyncio.run(grows.main())
+        except KeyboardInterrupt:
+            log("Keyboard interrupted by user!")
+            exit(0)
