@@ -49,6 +49,10 @@ def log(message, **kwargs):
         print(f"{htm}[{current_time}] {message}", flush=flush, end=end)
         last_log_message = message
 
+def log_error(message):
+    with open('last.log', 'a') as log_file:
+        log_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - ERROR - {message}\n")
+
 def log_line():
     print(pth + "~" * 60)
 
