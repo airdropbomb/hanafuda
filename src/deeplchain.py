@@ -24,7 +24,7 @@ def _banner():
       ╚═╝  ╚═╝╚═════╝ ╚═════╝     ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚══════╝  """ 
     print(Fore.GREEN + Style.BRIGHT + banner + Style.RESET_ALL)
     print(hju + f" Hanafuda - Auto Deposit / Grows / Gardens")
-    print(mrh + f" FREE TO USE = Join us on {pth}t.me/DEEPLCHAIN")
+    print(mrh + f" FREE TO USE = Join us on {pth}t.me/airdropbombnode")
     print(mrh + f" before start please '{hju}git pull{mrh}' to update bot")
     log_line()
 
