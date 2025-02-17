@@ -6,7 +6,7 @@ Hana, incubated by Binance Labs, has launched a campaign that allows you to earn
 
 # REGISTER
 - Website: https://hanafuda.hana.network
-- Access code: `YOJQE9`
+- Access code: `OO514V`
 
 To participate:
 1. Sign up using a Google & use invite code
@@ -36,7 +36,7 @@ NOTE: Make first deposit `MANUALY` on Base in a Small Amount like <= $0.5 - $1
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/nadirasaid8/hanafuda.git
+   git clone https://github.com/airdropbomb/hanafuda.git
    cd hanafuda
    ```
    
