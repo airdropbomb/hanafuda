@@ -2,7 +2,7 @@
 
 Hana, incubated by Binance Labs, has launched a campaign that allows you to earn points by depositing assets, collecting cards, and growing your garden.
 
-[TELEGRAM CHANNEL](https://t.me/Deeplchain) | [CONTACT](https://t.me/imspecials)
+[TELEGRAM CHANNEL](https://t.me/airdropbombnode)
 
 # REGISTER
 - Website: https://hanafuda.hana.network
