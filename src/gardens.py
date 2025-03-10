@@ -14,7 +14,7 @@ class Grows:
             self.access_tokens = [line.strip() for line in file if line.strip()]
         self.api_url = "https://hanafuda-backend-app-520478841386.us-central1.run.app/graphql"
         self.countdown_before_start = self.config.get('countdown_before_start', False)
-        self.countdown_loop = self.config.get('countdown_loop', 60)
+        self.countdown_loop = self.config.get('countdown_loop', 10)
         self.api_key = "AIzaSyDipzN0VRfTPnMGhQ5PSzO27Cxm3DohJGY"
         self.headers = {
             'Accept': '*/*',
